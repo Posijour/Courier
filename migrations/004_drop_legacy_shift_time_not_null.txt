@@ -1,0 +1,7 @@
+alter table shifts
+    alter column legacy_user_id drop not null,
+    alter column legacy_start_time drop not null;
+
+alter table orders
+    alter column legacy_user_id drop not null,
+    alter column legacy_ts drop not null;

@@ -1,0 +1,180 @@
+update orders
+set legacy_user_id = coalesce(legacy_user_id, u.legacy_id),
+    legacy_ts = coalesce(legacy_ts, ordered_at),
+    legacy_order_earnings = coalesce(legacy_order_earnings, amount)
+from users u
+where orders.user_id = u.id
+  and (
+      orders.legacy_user_id is null
+      or orders.legacy_ts is null
+      or orders.legacy_order_earnings is null
+  );
+
+update shifts
+set legacy_end_time = coalesce(legacy_end_time, ended_at)
+where ended_at is not null
+  and legacy_end_time is null;
+
+create or replace function close_active_shift(
+    p_account_id uuid,
+    p_telegram_id bigint,
+    p_earnings_total numeric
+)
+returns setof shifts
+language plpgsql
+as $$
+declare
+    v_user_id uuid;
+    v_shift_id bigint;
+    v_now timestamptz := now();
+    v_minutes integer;
+begin
+    select id into v_user_id
+    from users
+    where telegram_id = p_telegram_id;
+
+    if v_user_id is null then
+        return;
+    end if;
+
+    select id into v_shift_id
+    from shifts
+    where account_id = p_account_id
+      and user_id = v_user_id
+      and status = 'active'
+    order by started_at desc
+    limit 1
+    for update;
+
+    if v_shift_id is null then
+        return;
+    end if;
+
+    select greatest(1, floor(extract(epoch from (v_now - started_at)) / 60)::integer)
+    into v_minutes
+    from shifts
+    where id = v_shift_id;
+
+    return query
+    update shifts
+    set ended_at = v_now,
+        legacy_end_time = v_now,
+        duration_minutes = v_minutes,
+        earnings_total = p_earnings_total,
+        status = 'completed',
+        updated_at = v_now
+    where id = v_shift_id
+    returning *;
+end;
+$$;
+
+create or replace function create_order_for_account_user(
+    p_account_id uuid,
+    p_telegram_id bigint,
+    p_source_mode text,
+    p_external_order_id text default null,
+    p_currency text default 'RSD',
+    p_zone_id uuid default null,
+    p_service_type_id uuid default null,
+    p_source text default null,
+    p_district text default null,
+    p_position_district text default null,
+    p_pickup_district text default null,
+    p_dropoff_district text default null,
+    p_platform text default null,
+    p_amount numeric default null,
+    p_notes text default null
+)
+returns setof orders
+language plpgsql
+as $$
+declare
+    v_user_id uuid;
+    v_legacy_user_id bigint;
+    v_shift_id bigint;
+    v_amount numeric := coalesce(p_amount, 0);
+    v_ordered_at timestamptz := now();
+    v_order orders%rowtype;
+begin
+    select id, legacy_id into v_user_id, v_legacy_user_id
+    from users
+    where telegram_id = p_telegram_id;
+
+    if v_user_id is null then
+        raise exception 'User not found';
+    end if;
+
+    select id into v_shift_id
+    from shifts
+    where account_id = p_account_id
+      and user_id = v_user_id
+      and status = 'active'
+    order by started_at desc
+    limit 1
+    for update;
+
+    insert into orders (
+        account_id,
+        user_id,
+        legacy_user_id,
+        shift_id,
+        external_order_id,
+        currency,
+        zone_id,
+        service_type_id,
+        source,
+        status,
+        ordered_at,
+        legacy_ts,
+        completed_at,
+        notes,
+        amount,
+        legacy_order_earnings,
+        district,
+        position_district,
+        pickup_district,
+        dropoff_district,
+        platform,
+        source_mode,
+        created_at,
+        updated_at
+    )
+    values (
+        p_account_id,
+        v_user_id,
+        v_legacy_user_id,
+        v_shift_id,
+        p_external_order_id,
+        coalesce(p_currency, 'RSD'),
+        p_zone_id,
+        p_service_type_id,
+        p_source,
+        'completed',
+        v_ordered_at,
+        v_ordered_at,
+        v_ordered_at,
+        p_notes,
+        v_amount,
+        v_amount,
+        coalesce(p_district, p_position_district),
+        p_position_district,
+        p_pickup_district,
+        p_dropoff_district,
+        p_platform,
+        p_source_mode,
+        v_ordered_at,
+        v_ordered_at
+    )
+    returning * into v_order;
+
+    if v_shift_id is not null then
+        update shifts
+        set orders_count = orders_count + 1,
+            earnings_total = earnings_total + v_amount,
+            updated_at = now()
+        where id = v_shift_id;
+    end if;
+
+    return next v_order;
+end;
+$$;
