@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: tg-courier
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python render_entrypoint.py
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.11
+      - key: BOT_TOKEN
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: SUPABASE_TIMEOUT_SECONDS
+        value: "15"
+      - key: DEFAULT_CITY
+        value: Nis
+      - key: DEFAULT_ACCOUNT_SLUG
+        value: default-account
+      - key: WEATHER_LAT
+        value: "43.3209"
+      - key: WEATHER_LON
+        value: "21.8958"
+      - key: WEATHER_TIMEZONE
+        value: Europe/Belgrade

@@ -1,0 +1,10 @@
+BOT_TOKEN=<telegram_bot_token>
+SUPABASE_URL=<supabase_project_url>
+SUPABASE_KEY=<supabase_service_role_key>
+SUPABASE_TIMEOUT_SECONDS=15
+DEFAULT_CITY=Nis
+DEFAULT_ACCOUNT_SLUG=default-account
+WEATHER_LAT=43.3209
+WEATHER_LON=21.8958
+WEATHER_TIMEZONE=Europe/Belgrade
+PYTHON_VERSION=3.11.11

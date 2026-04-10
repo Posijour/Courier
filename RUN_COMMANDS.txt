@@ -1,0 +1,54 @@
+# Команды для локального запуска
+
+Выполнять из корня проекта:
+
+```powershell
+cd C:\Users\nikol\Desktop\codex\tg_courier
+```
+
+Создать виртуальное окружение:
+
+```powershell
+python -m venv .venv
+```
+
+Активировать виртуальное окружение:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+Установить зависимости:
+
+```powershell
+pip install -r requirements.txt
+```
+
+Запустить бота:
+
+```powershell
+python -m app.main
+```
+
+Проверить, что код компилируется без запуска Telegram polling:
+
+```powershell
+python -m compileall -q app\config.py app\bot.py app\main.py app\handlers app\services app\utils app\keyboards
+```
+
+Если PowerShell блокирует активацию `.venv`, разрешить запуск скриптов только для текущего процесса:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\.venv\Scripts\Activate.ps1
+```
+
+Миграции Supabase перед первым запуском применяются вручную в Supabase SQL Editor в таком порядке:
+
+```text
+migrations/001_init.sql
+migrations/002_advanced_research.sql
+migrations/003_multi_tenant.txt
+migrations/004_drop_legacy_shift_time_not_null.txt
+migrations/005_fill_legacy_columns_in_rpc.txt
+```
