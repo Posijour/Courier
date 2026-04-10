@@ -36,10 +36,23 @@ def load_start_bot() -> Callable[[], object]:
     candidates = ("app.bot", "bot")
 
     for module_name in candidates:
-        if importlib_util.find_spec(module_name) is None:
+        try:
+            module_spec = importlib_util.find_spec(module_name)
+        except ModuleNotFoundError:
+            # importlib can raise when a package prefix (e.g. "app" in "app.bot")
+            # does not exist. Treat this as "module not found" and continue.
             continue
 
-        module: ModuleType = importlib.import_module(module_name)
+        if module_spec is None:
+            continue
+
+        try:
+            module: ModuleType = importlib.import_module(module_name)
+        except ModuleNotFoundError:
+            # If import fails due to a missing dependency, keep probing other
+            # layout candidates before failing with a clear aggregate message.
+            continue
+
         start_bot = getattr(module, "start_bot", None)
         if callable(start_bot):
             return start_bot
