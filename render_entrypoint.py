@@ -1,10 +1,33 @@
 import asyncio
 import importlib
 import os
+import sys
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 from types import ModuleType
 from typing import Callable
+
+
+def configure_module_search_path() -> Path:
+    """Ensure Python can import bot modules from common Render layouts."""
+    cwd = Path.cwd().resolve()
+
+    candidate_roots: list[Path] = [cwd, cwd / "src"]
+    candidate_roots.extend(
+        path for path in cwd.iterdir() if path.is_dir() and not path.name.startswith(".")
+    )
+
+    for root in candidate_roots:
+        has_app_bot = (root / "app" / "bot.py").is_file()
+        has_flat_bot = (root / "bot.py").is_file()
+        if has_app_bot or has_flat_bot:
+            root_str = str(root)
+            if root_str not in sys.path:
+                sys.path.insert(0, root_str)
+            return root
+
+    return cwd
 
 
 def load_start_bot() -> Callable[[], object]:
@@ -12,11 +35,10 @@ def load_start_bot() -> Callable[[], object]:
     candidates = ("app.bot", "bot")
 
     for module_name in candidates:
-        try:
-            module: ModuleType = importlib.import_module(module_name)
-        except ModuleNotFoundError:
+        if importlib.util.find_spec(module_name) is None:
             continue
 
+        module: ModuleType = importlib.import_module(module_name)
         start_bot = getattr(module, "start_bot", None)
         if callable(start_bot):
             return start_bot
@@ -64,6 +86,9 @@ def run_health_server() -> None:
 
 
 def main() -> None:
+    project_root = configure_module_search_path()
+    print(f"[startup] project root for imports: {project_root}")
+
     start_bot = load_start_bot()
 
     thread = threading.Thread(target=run_health_server, daemon=True)
