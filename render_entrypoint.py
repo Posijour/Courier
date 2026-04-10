@@ -1,5 +1,6 @@
 import asyncio
 import importlib
+from importlib import util as importlib_util
 import os
 import sys
 import threading
@@ -35,7 +36,7 @@ def load_start_bot() -> Callable[[], object]:
     candidates = ("app.bot", "bot")
 
     for module_name in candidates:
-        if importlib.util.find_spec(module_name) is None:
+        if importlib_util.find_spec(module_name) is None:
             continue
 
         module: ModuleType = importlib.import_module(module_name)
