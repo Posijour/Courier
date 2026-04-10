@@ -1,9 +1,31 @@
 import asyncio
+import importlib
 import os
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from types import ModuleType
+from typing import Callable
 
-from app.bot import start_bot
+
+def load_start_bot() -> Callable[[], object]:
+    """Load start_bot from common project layouts."""
+    candidates = ("app.bot", "bot")
+
+    for module_name in candidates:
+        try:
+            module: ModuleType = importlib.import_module(module_name)
+        except ModuleNotFoundError:
+            continue
+
+        start_bot = getattr(module, "start_bot", None)
+        if callable(start_bot):
+            return start_bot
+
+    searched = ", ".join(candidates)
+    raise ModuleNotFoundError(
+        f"Cannot find callable start_bot in modules: {searched}. "
+        "Make sure the bot package is included in the deploy bundle."
+    )
 
 
 class HealthHandler(BaseHTTPRequestHandler):
@@ -42,6 +64,8 @@ def run_health_server() -> None:
 
 
 def main() -> None:
+    start_bot = load_start_bot()
+
     thread = threading.Thread(target=run_health_server, daemon=True)
     thread.start()
     asyncio.run(start_bot())
