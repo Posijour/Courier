@@ -22,7 +22,7 @@ def _shift_mode_keyboard() -> ReplyKeyboardMarkup:
     )
 
 
-@router.message(F.text == "Počni smenu")
+@router.message(F.text == "Pokreni smenu")
 async def handle_start_shift(message: Message, state: FSMContext) -> None:
     if not message.from_user:
         return
