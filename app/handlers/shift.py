@@ -99,7 +99,7 @@ async def handle_end_shift(message: Message, state: FSMContext) -> None:
 
     shift = await get_active_shift(message.from_user.id)
     if not shift:
-        wait message.answer("Nema aktivne smene", reply_markup=main_menu_keyboard())
+        await message.answer("Nema aktivne smene", reply_markup=main_menu_keyboard())
         return
 
     await state.set_state(CloseShiftStates.waiting_for_total)
