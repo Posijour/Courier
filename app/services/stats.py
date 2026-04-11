@@ -76,7 +76,7 @@ def _format_stats_block(title: str, stats: AggregatedShiftStats, currency: str) 
     return [
         f"{title}:",
         f"Смен: {stats.shifts_count}",
-        ff"💰 {format_money_value(stats.total_earnings)} {currency}",
+        f"💰 {format_money_value(stats.total_earnings)} {currency}",
         f"📦 {stats.orders_count} заказов",
         f"Часов: {format_hour_value(stats.total_hours)}",
         f"{currency}/ч: {format_hour_value(stats.avg_hourly)}",
