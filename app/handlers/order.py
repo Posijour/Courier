@@ -95,7 +95,7 @@ async def handle_add_order(message: Message, state: FSMContext) -> None:
     await create_order(telegram_id=message.from_user.id, source_mode="basic")
     shift = await get_active_shift(message.from_user.id)
     if not shift:
-        await message.answer("Заказ добавлен", reply_markup=main_menu_keyboard())
+        await message.answer("Заказ добавлен 📦", reply_markup=main_menu_keyboard())
         return
     shift_status = format_shift_status_text(
         shift,
@@ -103,7 +103,7 @@ async def handle_add_order(message: Message, state: FSMContext) -> None:
         blank_after_title=False,
     )
     await message.answer(
-        f"Заказ добавлен \n\n{shift_status}",
+        f"Заказ добавлен 📦\n\n{shift_status}",
         reply_markup=main_menu_keyboard(active_shift=True),
     )
 
@@ -175,7 +175,7 @@ async def handle_advanced_earnings(message: Message, state: FSMContext) -> None:
     shift = await get_active_shift(message.from_user.id)
     await state.clear()
     if not shift:
-        await message.answer("Заказ добавлен", reply_markup=main_menu_keyboard())
+        await message.answer("Заказ добавлен 📦", reply_markup=main_menu_keyboard())
         return
     shift_status = format_shift_status_text(
         shift,
@@ -183,7 +183,7 @@ async def handle_advanced_earnings(message: Message, state: FSMContext) -> None:
         blank_after_title=False,
     )
     await message.answer(
-        f"Заказ добавлен \n\n{shift_status}",
+        f"Заказ добавлен 📦\n\n{shift_status}",
         reply_markup=main_menu_keyboard(active_shift=True),
     )
 
@@ -295,7 +295,7 @@ async def handle_research_earnings(message: Message, state: FSMContext) -> None:
     shift = await get_active_shift(message.from_user.id)
     await state.clear()
     if not shift:
-        await message.answer("Заказ добавлен", reply_markup=main_menu_keyboard())
+        await message.answer("Заказ добавлен 📦", reply_markup=main_menu_keyboard())
         return
     shift_status = format_shift_status_text(
         shift,
@@ -303,6 +303,6 @@ async def handle_research_earnings(message: Message, state: FSMContext) -> None:
         blank_after_title=False,
     )
     await message.answer(
-        f"Заказ добавлен \n\n{shift_status}",
+        f"Заказ добавлен 📦\n\n{shift_status}",
         reply_markup=main_menu_keyboard(active_shift=True),
     )
