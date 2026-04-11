@@ -96,18 +96,18 @@ async def close_shift_summary(shift: ShiftRecord) -> str:
     currency = await _get_currency_for_account(shift.account_id)
 
     lines = [
-        "Сегодня:",
+        "Danas:",
         f"{format_hour_value(duration_hours)}h",
         f"💰 {format_money_value(shift.earnings_total)} {currency}",
-        f"📦 {shift.orders_count} заказов",
+        f"📦 Porudžbina: {shift.orders_count}",
         "",
-        f"{format_money_value(earnings_per_hour)} {currency}/час",
+        f"{format_money_value(earnings_per_hour)} {currency}/h",
     ]
 
     if historical_avg is not None and historical_avg > 0:
         delta = ((earnings_per_hour - historical_avg) / historical_avg) * Decimal("100")
-        direction = "выше" if delta >= 0 else "ниже"
-        lines.append(f"{direction} твоего среднего ({format_percent_delta(delta)})")
+        direction = "više" if delta >= 0 else "niže"
+        lines.append(f"{direction} od tvog proseka ({format_percent_delta(delta)})")
 
     return "\n".join(lines)
 
