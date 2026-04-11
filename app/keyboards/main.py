@@ -10,7 +10,7 @@ def main_menu_keyboard(active_shift: bool = False) -> ReplyKeyboardMarkup:
         ]
     else:
         keyboard = [
-            [KeyboardButton(text="+ Porudžbina"), KeyboardButton(text="Završi smenu")],
+            [KeyboardButton(text="Pokreni smenu")],
             [KeyboardButton(text="Moja statistika")],
             [KeyboardButton(text="Danas vs juče"), KeyboardButton(text="Nedelja")],
         ]
