@@ -28,8 +28,8 @@ async def handle_my_stats(message: Message) -> None:
                 format_shift_status_text(
                     shift,
                     context.bot_settings.timezone,
-                    title="Смена сейчас активна",
-                    orders_label="Заказов в текущей смене",
+                    title="Смена сейчас активна ✅",
+                    orders_label="Заказов",
                     blank_after_title=False,
                 ),
                 text,
