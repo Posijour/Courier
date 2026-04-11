@@ -34,7 +34,7 @@ async def handle_start_shift(message: Message, state: FSMContext) -> None:
             format_shift_status_text(
                 shift,
                 context.bot_settings.timezone,
-                title="Смена уже активна",
+                title="Смена уже активна ✅",
             ),
             reply_markup=main_menu_keyboard(active_shift=True),
         )
@@ -76,7 +76,7 @@ async def handle_start_shift_mode(message: Message, state: FSMContext) -> None:
             format_shift_status_text(
                 shift,
                 context.bot_settings.timezone,
-                title="Смена уже активна",
+                title="Смена уже активна ✅",
             ),
             reply_markup=main_menu_keyboard(active_shift=True),
         )
@@ -124,4 +124,4 @@ async def handle_close_shift_total(message: Message, state: FSMContext) -> None:
 
     summary = await close_shift_summary(shift)
     await state.clear()
-    await message.answer(f"Смена завершена\n\n{summary}", reply_markup=main_menu_keyboard())
+    await message.answer(f"Смена завершена ❌\n\n{summary}", reply_markup=main_menu_keyboard())
