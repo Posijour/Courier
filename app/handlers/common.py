@@ -16,4 +16,13 @@ async def handle_start(message: Message) -> None:
 
     await resolve_tenant_context_for_telegram_user(message.from_user)
     shift = await get_active_shift(message.from_user.id)
-    await message.answer("Меню", reply_markup=main_menu_keyboard(active_shift=shift is not None))
+    await message.answer("Используй кнопки внизу экрана 👇", reply_markup=main_menu_keyboard(active_shift=shift is not None))
+
+
+@router.message(
+    lambda message: bool(message.text)
+    and message.text.startswith("/")
+    and not message.text.split(maxsplit=1)[0].startswith("/start")
+)
+async def handle_menu_command_stub(message: Message) -> None:
+    await message.answer("Используй кнопки ниже 👇")
