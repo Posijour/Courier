@@ -16,13 +16,13 @@ def _shift_mode_keyboard() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text="Advanced"), KeyboardButton(text="Research")],
-            [KeyboardButton(text="Отмена")],
+            [KeyboardButton(text="Otkaži")],
         ],
         resize_keyboard=True,
     )
 
 
-@router.message(F.text == "Старт смены")
+@router.message(F.text == "Počni smenu")
 async def handle_start_shift(message: Message, state: FSMContext) -> None:
     if not message.from_user:
         return
@@ -34,7 +34,7 @@ async def handle_start_shift(message: Message, state: FSMContext) -> None:
             format_shift_status_text(
                 shift,
                 context.bot_settings.timezone,
-                title="Смена уже активна ✅",
+                title="Smena je već aktivna ✅",
             ),
             reply_markup=main_menu_keyboard(active_shift=True),
         )
@@ -43,7 +43,7 @@ async def handle_start_shift(message: Message, state: FSMContext) -> None:
     context = await resolve_tenant_context_for_telegram_user(message.from_user)
     if supports_advanced_mode(context):
         await state.set_state(StartShiftStates.waiting_for_mode)
-        await message.answer("Выберите режим смены", reply_markup=_shift_mode_keyboard())
+        await message.answer("Izaberi režim smene", reply_markup=_shift_mode_keyboard())
         return
 
     await state.clear()
@@ -59,13 +59,13 @@ async def handle_start_shift_mode(message: Message, state: FSMContext) -> None:
     if not message.from_user or not message.text:
         return
 
-    if message.text == "Отмена":
+    if message.text == "Otkaži":
         await state.clear()
-        await message.answer("Отменено", reply_markup=main_menu_keyboard())
+        await message.answer("Otkazano", reply_markup=main_menu_keyboard())
         return
 
     if message.text not in {"Advanced", "Research"}:
-        await message.answer("Выберите Advanced или Research", reply_markup=_shift_mode_keyboard())
+        await message.answer("Izaberi Advanced ili Research", reply_markup=_shift_mode_keyboard())
         return
 
     shift = await get_active_shift(message.from_user.id)
@@ -76,7 +76,7 @@ async def handle_start_shift_mode(message: Message, state: FSMContext) -> None:
             format_shift_status_text(
                 shift,
                 context.bot_settings.timezone,
-                title="Смена уже активна ✅",
+                title="Smena je već aktivna ✅",
             ),
             reply_markup=main_menu_keyboard(active_shift=True),
         )
@@ -92,18 +92,18 @@ async def handle_start_shift_mode(message: Message, state: FSMContext) -> None:
     )
 
 
-@router.message(F.text == "Конец смены")
+@router.message(F.text == "Završi smenu")
 async def handle_end_shift(message: Message, state: FSMContext) -> None:
     if not message.from_user:
         return
 
     shift = await get_active_shift(message.from_user.id)
     if not shift:
-        await message.answer("Нет активной смены", reply_markup=main_menu_keyboard())
+        wait message.answer("Nema aktivne smene", reply_markup=main_menu_keyboard())
         return
 
     await state.set_state(CloseShiftStates.waiting_for_total)
-    await message.answer("Введите итоговую выручку", reply_markup=main_menu_keyboard(active_shift=True))
+    await message.answer("Unesi ukupnu zaradu", reply_markup=main_menu_keyboard(active_shift=True))
 
 
 @router.message(CloseShiftStates.waiting_for_total)
@@ -113,15 +113,15 @@ async def handle_close_shift_total(message: Message, state: FSMContext) -> None:
 
     amount = parse_decimal(message.text)
     if amount is None:
-        await message.answer("Введите число")
+        await message.answer("Unesi broj")
         return
 
     shift = await close_shift(message.from_user.id, amount)
     if shift is None:
         await state.clear()
-        await message.answer("Нет активной смены", reply_markup=main_menu_keyboard())
+        await message.answer("Nema aktivne smene", reply_markup=main_menu_keyboard())
         return
 
     summary = await close_shift_summary(shift)
     await state.clear()
-    await message.answer(f"Смена завершена ❌\n\n{summary}", reply_markup=main_menu_keyboard())
+    await message.answer(f"Smena je završena ❌\n\n{summary}", reply_markup=main_menu_keyboard())
