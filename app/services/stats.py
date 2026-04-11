@@ -69,17 +69,17 @@ def _format_signed_int(value: int) -> str:
 def _format_signed_hourly(value: Decimal, currency: str) -> str:
     rounded = Decimal(str(value)).quantize(Decimal("0.1"))
     sign = "+" if rounded >= 0 else "-"
-    return f"{sign}{format_hour_value(abs(rounded))} {currency}/ч"
+    return f"{sign}{format_hour_value(abs(rounded))} {currency}/h"
 
 
 def _format_stats_block(title: str, stats: AggregatedShiftStats, currency: str) -> list[str]:
     return [
         f"{title}:",
-        f"Смен: {stats.shifts_count}",
+        f"Smena: {stats.shifts_count}",
         f"💰 {format_money_value(stats.total_earnings)} {currency}",
-        f"📦 {stats.orders_count} заказов",
-        f"Часов: {format_hour_value(stats.total_hours)}",
-        f"{currency}/ч: {format_hour_value(stats.avg_hourly)}",
+        f"📦 Porudžbina: {stats.orders_count}",
+        f"Sati: {format_hour_value(stats.total_hours)}",
+        f"{currency}/h: {format_hour_value(stats.avg_hourly)}",
     ]
 
 
@@ -152,11 +152,11 @@ async def build_personal_stats_text(telegram_id: int) -> str:
 
     return "\n".join(
         [
-            "Моя статистика:",
-            f"Смен: {stats.shifts_count}",
-            f"Заказов: {stats.orders_count}",
+            "Moja statistika:",
+            f"Smena: {stats.shifts_count}",
+            f"Porudžbina: {stats.orders_count}",
             f"💰 {format_money_value(stats.total_earnings)} {currency}",
-            f"{format_money_value(stats.avg_eph)} {currency}/час",
+            f"{format_money_value(stats.avg_eph)} {currency}/h",
         ]
     )
 
@@ -185,20 +185,20 @@ async def build_today_vs_yesterday_text(telegram_id: int) -> str:
     yesterday_stats = _aggregate_shifts(yesterday_shifts)
 
     if not today_stats.has_data and not yesterday_stats.has_data:
-        return "Сегодня vs вчера\n\nНедостаточно данных для сравнения сегодня и вчера."
+        return "Danas vs juče\n\nNema dovoljno podataka za poređenje današnjeg i jučerašnjeg dana."
 
-    lines = ["Сегодня vs вчера", ""]
+    lines = ["Danas vs juče", ""]
     if today_stats.has_data:
-        lines.extend(_format_stats_block("Сегодня", today_stats, currency))
+        lines.extend(_format_stats_block("Danas", today_stats, currency))
     else:
-        lines.append("За сегодня пока нет завершенных смен.")
+        lines.append("Za danas još nema završenih smena.")
 
     lines.append("")
 
     if yesterday_stats.has_data:
-        lines.extend(_format_stats_block("Вчера", yesterday_stats, currency))
+        lines.extend(_format_stats_block("Juče", yesterday_stats, currency))
     else:
-        lines.append("За вчера пока нет завершенных смен.")
+        lines.append("Za juče još nema završenih smena.")
 
     if today_stats.has_data and yesterday_stats.has_data:
         income_delta = today_stats.total_earnings - yesterday_stats.total_earnings
@@ -207,10 +207,10 @@ async def build_today_vs_yesterday_text(telegram_id: int) -> str:
         lines.extend(
             [
                 "",
-                "Разница:",
-                f"Доход: {_format_signed_money(income_delta, currency)}",
-                f"Заказы: {_format_signed_int(orders_delta)}",
-                f"{currency}/ч: {_format_signed_hourly(hourly_delta, currency)}",
+                "Razlika:",
+                f"Prihod: {_format_signed_money(income_delta, currency)}",
+                f"Porudžbine: {_format_signed_int(orders_delta)}",
+                f"{currency}/h: {_format_signed_hourly(hourly_delta, currency)}",
             ]
         )
 
@@ -226,7 +226,7 @@ async def build_weekly_stats_text(telegram_id: int) -> str:
     stats = _aggregate_shifts(shifts)
 
     if not stats.has_data:
-        return "Неделя\n\nЗа последние 7 дней пока нет завершенных смен."
+        return "Nedelja\n\nU poslednjih 7 dana još nema završenih smena."
 
     daily_income: dict[date, Decimal] = {}
     for shift in shifts:
@@ -239,15 +239,15 @@ async def build_weekly_stats_text(telegram_id: int) -> str:
     worst_day = min(daily_income.items(), key=lambda item: (item[1], item[0]))
 
     lines = [
-        "Неделя",
+        "Nedelja",
         "",
-        f"Смен: {stats.shifts_count}",
-        f"Заказов: {stats.orders_count}",
-        f"Доход: {format_money_value(stats.total_earnings)} {currency}",
-        f"Часов: {format_hour_value(stats.total_hours)}",
-        f"{currency}/ч: {format_hour_value(stats.avg_hourly)}",
+        f"Smena: {stats.shifts_count}",
+        f"Porudžbina: {stats.orders_count}",
+        f"Prihod: {format_money_value(stats.total_earnings)} {currency}",
+        f"Sati: {format_hour_value(stats.total_hours)}",
+        f"{currency}/h: {format_hour_value(stats.avg_hourly)}",
         "",
-        f"Лучший день: {_day_income_label(best_day[0])} ({format_money_value(best_day[1])} {currency})",
-        f"Худший день: {_day_income_label(worst_day[0])} ({format_money_value(worst_day[1])} {currency})",
+        f"Najbolji dan: {_day_income_label(best_day[0])} ({format_money_value(best_day[1])} {currency})",
+        f"Najslabiji dan: {_day_income_label(worst_day[0])} ({format_money_value(worst_day[1])} {currency})",
     ]
     return "\n".join(lines)
