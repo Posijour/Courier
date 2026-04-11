@@ -23,7 +23,7 @@ def format_shift_start_time(shift: ShiftRecord, timezone_name: str) -> str:
 def format_shift_status_text(
     shift: ShiftRecord,
     timezone_name: str,
-    title: str = "Смена активна",
+    title: str = "Смена активна ✅",
     orders_label: str = "Заказов",
     blank_after_title: bool = True,
 ) -> str:
