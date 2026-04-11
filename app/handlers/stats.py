@@ -14,7 +14,7 @@ from app.utils.shift_status import format_shift_status_text
 router = Router()
 
 
-@router.message(F.text == "Моя статистика")
+@router.message(F.text == "Moja statistika")
 async def handle_my_stats(message: Message) -> None:
     if not message.from_user:
         return
@@ -28,8 +28,8 @@ async def handle_my_stats(message: Message) -> None:
                 format_shift_status_text(
                     shift,
                     context.bot_settings.timezone,
-                    title="Смена сейчас активна ✅",
-                    orders_label="Заказов",
+                    title="Smena je trenutno aktivna ✅",
+                    orders_label="Porudžbina",
                     blank_after_title=False,
                 ),
                 text,
@@ -38,7 +38,7 @@ async def handle_my_stats(message: Message) -> None:
     await message.answer(text, reply_markup=main_menu_keyboard(active_shift=shift is not None))
 
 
-@router.message(F.text == "Сегодня vs вчера")
+@router.message(F.text == "Danas vs juče")
 async def handle_today_vs_yesterday(message: Message) -> None:
     if not message.from_user:
         return
@@ -48,7 +48,7 @@ async def handle_today_vs_yesterday(message: Message) -> None:
     await message.answer(text, reply_markup=main_menu_keyboard(active_shift=shift is not None))
 
 
-@router.message(F.text == "Неделя")
+@router.message(F.text == "Nedelja")
 async def handle_weekly_stats(message: Message) -> None:
     if not message.from_user:
         return
