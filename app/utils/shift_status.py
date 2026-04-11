@@ -23,10 +23,10 @@ def format_shift_start_time(shift: ShiftRecord, timezone_name: str) -> str:
 def format_shift_status_text(
     shift: ShiftRecord,
     timezone_name: str,
-    title: str = "Смена активна ✅",
-    orders_label: str = "Заказов",
+    title: str = "Smena je aktivna ✅",
+    orders_label: str = "Porudžbina",
     blank_after_title: bool = True,
 ) -> str:
     start_time = format_shift_start_time(shift, timezone_name)
     separator = "\n\n" if blank_after_title else "\n"
-    return f"{title} {separator}Старт: {start_time}\n{orders_label}: {shift.orders_count}"
+    return f"{title} {separator}Početak: {start_time}\n{orders_label}: {shift.orders_count}"
